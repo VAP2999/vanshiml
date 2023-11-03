@@ -1,0 +1,42 @@
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+# Load the CIFAR-10 dataset
+(x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+
+# Preprocess the data
+x_train, x_test = x_train / 255.0, x_test / 255.0
+
+# Build the CNN model
+model = keras.Sequential([
+    # Convolutional layer 1
+    layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+    layers.MaxPooling2D((2, 2)),
+
+    # Convolutional layer 2
+    layers.Conv2D(64, (3, 3), activation='relu'),
+    layers.MaxPooling2D((2, 2)),
+
+    # Convolutional layer 3
+    layers.Conv2D(64, (3, 3), activation='relu'),
+
+    # Flatten the output for fully connected layers
+    layers.Flatten(),
+
+    # Fully connected layers
+    layers.Dense(64, activation='relu'),
+    layers.Dense(10)  # 10 output classes
+])
+
+# Compile the model
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+# Train the model
+model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
+
+# Evaluate the model
+test_loss, test_acc = model.evaluate(x_test, y_test)
+print("\nTest accuracy:", test_acc)

@@ -1,0 +1,38 @@
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.impute import SimpleImputer
+
+# Define the features (X) and the target variable (y)
+X = dataset['bpm']
+y = dataset['artist_count']
+
+
+# Reshape X to a 2D array
+X = X.values.reshape(-1, 1)
+
+imputer = SimpleImputer(strategy='most_frequent')
+X_imputed = imputer.fit_transform(X)
+
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_imputed, y, test_size=0.2, random_state=42)
+
+# Create a Support Vector Machine (SVM) classifier
+clf = SVC(kernel='linear', C=1, random_state=42)
+
+# Train the classifier on the training data
+clf.fit(X_train, y_train)
+
+# Predict the classes for the test data
+y_pred = clf.predict(X_test)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+
+# Generate a classification report
+class_report = classification_report(y_test, y_pred)
+print("Classification Report:\n", class_report)
