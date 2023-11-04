@@ -1,0 +1,50 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+# Assuming you have a CSV with text data (e.g., reviews) and their corresponding labels (sentiment)
+file_path = r"C:\Users\pvans\Downloads\spotify-2023.csv"
+
+# Load data (considering 'text' column for text and 'sentiment' column for labels)
+data = pd.read_csv(file_path,encoding='ISO_8859-1')
+
+# Separate the text and labels
+texts = data['track_name']
+labels = data['artist_count']
+
+# Tokenize the text
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts(texts)
+word_index = tokenizer.word_index
+
+# Convert text data to sequences
+sequences = tokenizer.texts_to_sequences(texts)
+padded_sequences = pad_sequences(sequences, maxlen=100)  # Adjust maxlen as needed
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(padded_sequences, labels, test_size=0.2, random_state=42)
+
+# Define the model (simple neural network for text classification)
+model = keras.Sequential([
+    layers.Embedding(len(word_index) + 1, 32, input_length=100),  # Embedding layer
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(1, activation='sigmoid')
+])
+
+# Compile the model
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(X_train, y_train, epochs=5, batch_size=32, validation_split=0.1)
+
+# Evaluate the model
+test_loss, test_acc = model.evaluate(X_test, y_test)
+print(f'Test accuracy: {test_acc}')
+
+# Predict on test data
+y_pred = model.predict(X_test)
+print("Predicted values:", y_pred)
